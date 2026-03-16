@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Pet, OwnerMedicationRule } from '../types';
 import { BODY_PARTS, MEDICATION_CATEGORIES } from '../constants';
 import { OWNER_MEDICATION_RULES } from '../data/medicationData';
-import { Edit2, Info, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface PetProfileProps {

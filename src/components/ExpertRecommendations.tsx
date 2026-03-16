@@ -7,10 +7,9 @@ import { PRODUCTS } from '../constants';
 interface ExpertRecommendationsProps {
   recommendations: Recommendation[];
   loading: boolean;
-  petBreed?: string;
 }
 
-const ExpertRecommendations: React.FC<ExpertRecommendationsProps> = ({ recommendations, loading, petBreed }) => {
+const ExpertRecommendations: React.FC<ExpertRecommendationsProps> = ({ recommendations, loading }) => {
   if (loading) {
     return (
       <div className="p-6 bg-orange-50 rounded-2xl border border-orange-100 animate-pulse">
@@ -62,10 +61,6 @@ const ExpertRecommendations: React.FC<ExpertRecommendationsProps> = ({ recommend
                   {hasProducts && (
                     <div className="mt-4 space-y-3">
                       {PRODUCTS.filter(p => rec.content.includes(p.name)).map(product => {
-                        const isDalmatian = petBreed === '大麥町 (Dalmatian)';
-                        const isGreenMussel = product.name === '德國 100%天然綠唇貽貝精華粉';
-                        const shouldShowRecommended = product.isRecommended && !(isDalmatian && isGreenMussel);
-
                         return (
                           <div key={product.name} className="flex gap-3 p-3 bg-orange-50 rounded-xl border border-orange-100 items-center relative overflow-hidden">
                             <img src={product.image} alt={product.name} className="w-16 h-16 rounded-lg object-cover bg-white" referrerPolicy="no-referrer" />

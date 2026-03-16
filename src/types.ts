@@ -65,4 +65,18 @@ export interface OwnerMedicationRule {
   color: string;
   indications: string;
   reminders: string[];
+  brandName?: string;
+  usage?: string;
+  precautions?: string;
+  storage?: string;
+}
+
+export interface MallProduct {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  description: string;
+  image: string;
+  stock: number;
 }

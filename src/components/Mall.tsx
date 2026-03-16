@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Pet, Recommendation } from '../types';
+import React, { useState, useMemo } from 'react';
+import { Pet } from '../types';
 import { PRODUCT_CATEGORIES, PRODUCTS } from '../constants';
-import { ShoppingCart, Star, UserCircle, ChevronDown } from 'lucide-react';
+import { ShoppingCart, UserCircle, ChevronDown } from 'lucide-react';
 
 interface MallProps {
   pets: Pet[];
@@ -68,7 +68,7 @@ const Mall: React.FC<MallProps> = ({ pets, activePetId, onSwitchPet }) => {
   }, [activePet]);
 
   const displayProducts = useMemo(() => {
-    let filtered = activeCategory === 'all' 
+    const filtered = activeCategory === 'all' 
       ? [...PRODUCTS] 
       : PRODUCTS.filter(p => p.category === activeCategory);
 
@@ -161,8 +161,6 @@ const Mall: React.FC<MallProps> = ({ pets, activePetId, onSwitchPet }) => {
       {/* Product List */}
       <div className="grid grid-cols-1 gap-4">
         {displayProducts.map(product => {
-          const isRecommended = recommendedProductIds.has(product.id);
-
           return (
             <div key={product.id} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex gap-4 items-center relative overflow-hidden">
               <img 

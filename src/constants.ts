@@ -1,3 +1,5 @@
+import { Product } from './types';
+
 export const DOG_BREEDS = [
   '米克斯 (Mixed Breed)',
   '哈士奇 (Husky)',
@@ -97,7 +99,7 @@ export const PRODUCT_CATEGORIES = [
   { id: 'nursing', label: '護理用品' },
 ];
 
-export const PRODUCTS = [
+export const PRODUCTS: Product[] = [
   {
     id: 'p1',
     category: 'joint',
