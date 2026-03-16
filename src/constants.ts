@@ -1,28 +1,13 @@
-import { Product } from './types';
-
 export const DOG_BREEDS = [
-  '米克斯 (Mixed Breed)',
   '哈士奇 (Husky)',
   '大麥町 (Dalmatian)',
-  '阿拉斯加 (Alaskan Malamute)',
-  '柴犬 (Shiba Inu)',
   '黃金獵犬 (Golden Retriever)',
   '拉不拉多 (Labrador)',
-  '貴賓犬 (Poodle)',
-  '法斗 (French Bulldog)',
-  '柯基 (Corgi)',
 ];
 
 export const CAT_BREEDS = [
-  '米克斯 (Mixed Breed)',
-  '布偶貓 (Ragdoll)',
-  '緬因貓 (Maine Coon)',
-  '孟加拉貓 (Bengal)',
-  '英國短毛貓 (British Shorthair)',
-  '美國短毛貓 (American Shorthair)',
   '波斯貓 (Persian)',
-  '暹羅貓 (Siamese)',
-  '蘇格蘭折耳貓 (Scottish Fold)',
+  '布偶貓 (Ragdoll)',
 ];
 
 export const ALLERGENS = [
@@ -99,7 +84,7 @@ export const PRODUCT_CATEGORIES = [
   { id: 'nursing', label: '護理用品' },
 ];
 
-export const PRODUCTS: Product[] = [
+export const PRODUCTS = [
   {
     id: 'p1',
     category: 'joint',

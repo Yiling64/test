@@ -60,7 +60,6 @@ const PetProfile: React.FC<PetProfileProps> = ({ pet, onEdit, onUpdatePet }) => 
   };
 
   const breedDiseases = getBreedDiseases(pet.breed);
-
   const weightInfo = getWeightInfo();
 
   return (
@@ -200,13 +199,13 @@ const PetProfile: React.FC<PetProfileProps> = ({ pet, onEdit, onUpdatePet }) => 
         )}
       </div>
 
-      {/* Special Reminders Section */}
+      {/* Breed-Specific Care Tips */}
       {breedDiseases.length > 0 && (
-        <div className="mt-8 p-4 bg-blue-50/50 rounded-xl border border-blue-100/50 space-y-2">
-          <h3 className="text-[10px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-1">
-            <span className="w-1 h-1 bg-blue-400 rounded-full"></span> 品種性疾病提示 / Breed-Specific Alert
+        <div className="mb-6 p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
+          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+            <span className="w-1 h-1 bg-slate-400 rounded-full"></span> 品種專屬照護提示 / Breed-Specific Care
           </h3>
-          <div className="text-xs text-blue-700 leading-relaxed">
+          <div className="text-xs text-slate-600 leading-relaxed">
             {breedDiseases.map((disease, i) => (
               <p key={i}>• {disease}</p>
             ))}

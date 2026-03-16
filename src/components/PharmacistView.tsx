@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Pet, PharmacistMedication } from '../types';
 import { PHARMACIST_MEDICATIONS } from '../data/medicationData';
-import { Search, Pill, Activity, AlertTriangle, ChevronRight, X, ClipboardList, ChevronLeft, ShoppingBag } from 'lucide-react';
+import { Search, Pill, Activity, AlertTriangle, ChevronRight, ClipboardList, ChevronLeft, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface PharmacistViewProps {
@@ -19,9 +19,9 @@ const PharmacistView: React.FC<PharmacistViewProps> = ({ pets }) => {
   ) : [];
 
   const filteredDrugs = Object.entries(PHARMACIST_MEDICATIONS).filter(([name, info]) => 
-    name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    info.brandName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    info.professionalCategory.toLowerCase().includes(searchTerm.toLowerCase())
+    name.toLowerCase().startsWith(searchTerm.toLowerCase()) || 
+    info.brandName.toLowerCase().startsWith(searchTerm.toLowerCase()) ||
+    info.professionalCategory.toLowerCase().startsWith(searchTerm.toLowerCase())
   );
 
   const getMedInfo = (name: string): PharmacistMedication | undefined => {
@@ -168,26 +168,27 @@ const PharmacistView: React.FC<PharmacistViewProps> = ({ pets }) => {
         )}
       </div>
 
-      {/* Pet Detail Modal */}
+      {/* Pet Detail Page */}
       <AnimatePresence>
         {selectedPet && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedPet(null)}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
-            >
-              <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-[#008d36] text-white">
-                <div className="flex items-center gap-3">
-                  <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-3xl overflow-hidden border border-white/30">
+          <motion.div 
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            className="fixed inset-0 z-[100] bg-slate-50 flex flex-col overflow-y-auto"
+          >
+            <div className="bg-emerald-50 text-emerald-900 px-6 py-8 border-b border-emerald-100">
+              <div className="max-w-4xl mx-auto">
+                <button 
+                  onClick={() => setSelectedPet(null)}
+                  className="mb-6 flex items-center gap-2 text-emerald-600 font-bold hover:text-emerald-700 transition-colors"
+                >
+                  <ChevronLeft className="w-5 h-5" /> 返回列表
+                </button>
+                
+                <div className="flex items-center gap-6">
+                  <div className="w-20 h-20 bg-emerald-100 rounded-[32px] flex items-center justify-center text-4xl overflow-hidden border-2 border-emerald-200 shadow-sm">
                     {selectedPet.photoUrl ? (
                       <img src={selectedPet.photoUrl} alt={selectedPet.name} className="w-full h-full object-cover" />
                     ) : (
@@ -195,58 +196,57 @@ const PharmacistView: React.FC<PharmacistViewProps> = ({ pets }) => {
                     )}
                   </div>
                   <div>
-                    <h2 className="text-xl font-black">{selectedPet.name} 健康紀錄</h2>
-                    <p className="text-xs opacity-80">毛孩 ID: {selectedPet.displayId} • {selectedPet.breed} • {selectedPet.ageYears}歲{selectedPet.ageMonths}個月</p>
+                    <h2 className="text-3xl font-black mb-1">{selectedPet.name} 健康紀錄</h2>
+                    <p className="text-sm font-bold text-emerald-700/80">毛孩 ID: {selectedPet.displayId} • {selectedPet.breed} • {selectedPet.ageYears}歲{selectedPet.ageMonths}個月</p>
                   </div>
                 </div>
-                <button onClick={() => setSelectedPet(null)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                  <X className="w-6 h-6" />
-                </button>
               </div>
+            </div>
 
-              <div className="flex-1 overflow-y-auto p-6 space-y-8">
+            <div className="flex-1 p-6">
+              <div className="max-w-4xl mx-auto space-y-6">
                 {/* Basic Stats */}
                 <div className="grid grid-cols-3 gap-4">
-                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">體重</p>
-                    <p className="text-lg font-black text-slate-800">{selectedPet.weight} kg</p>
+                  <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
+                    <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">體重</p>
+                    <p className="text-lg font-black text-slate-700">{selectedPet.weight} kg</p>
                   </div>
-                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">結紮</p>
-                    <p className="text-lg font-black text-slate-800">{selectedPet.neutered === 'yes' ? '已結紮' : '未結紮'}</p>
+                  <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
+                    <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">結紮</p>
+                    <p className="text-lg font-black text-slate-700">{selectedPet.neutered === 'yes' ? '已結紮' : '未結紮'}</p>
                   </div>
-                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">過敏原</p>
-                    <p className="text-sm font-black text-slate-800 truncate">{selectedPet.allergens.join(', ') || '無'}</p>
+                  <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
+                    <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">過敏原</p>
+                    <p className="text-lg font-black text-slate-700 truncate">{selectedPet.allergens.join(', ') || '無'}</p>
                   </div>
                 </div>
 
                 {/* Health Issues */}
-                <section>
-                  <h3 className="text-sm font-black text-slate-800 mb-4 flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-rose-500" /> 健康狀況
+                <section className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm">
+                  <h3 className="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-rose-500" /> 健康狀況
                   </h3>
-                  <div className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {selectedPet.healthIssues.length > 0 ? (
                       selectedPet.healthIssues.map(issue => (
-                        <div key={issue.part} className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                          <p className="text-xs font-bold text-[#008d36] mb-1">{issue.part}</p>
-                          <p className="text-sm font-bold text-slate-800 mb-1">{issue.diseases.join(', ')}</p>
-                          {issue.description && <p className="text-xs text-slate-500 italic">"{issue.description}"</p>}
+                        <div key={issue.part} className="bg-slate-50 p-5 rounded-2xl border border-slate-100">
+                          <p className="text-xs font-black text-[#008d36] mb-2 uppercase tracking-widest">{issue.part}</p>
+                          <p className="text-sm font-bold text-slate-800 mb-2">{issue.diseases.join(', ')}</p>
+                          {issue.description && <p className="text-xs text-slate-500 italic leading-relaxed">"{issue.description}"</p>}
                         </div>
                       ))
                     ) : (
-                      <p className="text-sm text-slate-400 italic">無異常紀錄</p>
+                      <p className="text-sm text-slate-400 italic py-4">無異常紀錄</p>
                     )}
                   </div>
                 </section>
 
                 {/* Medications */}
-                <section>
-                  <h3 className="text-sm font-black text-slate-800 mb-4 flex items-center gap-2">
-                    <Pill className="w-4 h-4 text-[#008d36]" /> 目前用藥 (點擊查看藥典)
+                <section className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm">
+                  <h3 className="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
+                    <Pill className="w-5 h-5 text-[#008d36]" /> 目前用藥 (點擊查看藥典)
                   </h3>
-                  <div className="grid grid-cols-1 gap-3">
+                  <div className="grid grid-cols-1 gap-4">
                     {selectedPet.medications.length > 0 ? (
                       selectedPet.medications.map(med => {
                         const info = getMedInfo(med.name);
@@ -255,35 +255,35 @@ const PharmacistView: React.FC<PharmacistViewProps> = ({ pets }) => {
                             key={med.category}
                             onClick={() => info && setSelectedMedInfo({ name: med.name, info })}
                             disabled={!info}
-                            className={`flex items-center justify-between p-4 rounded-2xl border transition-all text-left ${
+                            className={`flex items-center justify-between p-6 rounded-2xl border transition-all text-left ${
                               info 
                                 ? 'bg-white border-[#008d36]/10 hover:border-[#008d36] hover:shadow-md' 
                                 : 'bg-slate-50 border-slate-100 opacity-60'
                             }`}
                           >
                             <div>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">{med.category}</p>
-                              <p className="font-black text-slate-800">{med.name}</p>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{med.category}</p>
+                              <p className="text-lg font-black text-slate-800">{med.name}</p>
                             </div>
                             {info ? (
                               <div className="flex items-center gap-2 text-[#008d36]">
-                                <span className="text-[10px] font-bold uppercase">查看藥典</span>
-                                <ChevronRight className="w-4 h-4" />
+                                <span className="text-xs font-bold uppercase tracking-widest">查看藥典</span>
+                                <ChevronRight className="w-5 h-5" />
                               </div>
                             ) : (
-                              <span className="text-[10px] font-bold text-slate-300 uppercase">無詳細資訊</span>
+                              <span className="text-xs font-bold text-slate-300 uppercase tracking-widest">無詳細資訊</span>
                             )}
                           </button>
                         );
                       })
                     ) : (
-                      <p className="text-sm text-slate-400 italic">目前無用藥紀錄</p>
+                      <p className="text-sm text-slate-400 italic py-4">目前無用藥紀錄</p>
                     )}
                   </div>
                 </section>
               </div>
-            </motion.div>
-          </div>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -367,11 +367,14 @@ const PharmacistView: React.FC<PharmacistViewProps> = ({ pets }) => {
                   <h3 className="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
                     <Pill className="w-5 h-5 text-emerald-600" /> 物種劑量
                   </h3>
-                  <div className="space-y-4">
+                  <div className="space-y-2">
                     {Object.entries(selectedMedInfo.info.speciesDosage).map(([species, dosage]) => (
-                      <div key={species} className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                        <p className="text-xs font-black text-emerald-600 mb-1 uppercase tracking-widest">{species}</p>
-                        <p className="text-sm font-bold text-slate-800">{dosage}</p>
+                      <div key={species} className="flex items-center gap-1.5">
+                        <p className="w-12 text-sm font-black text-emerald-600 uppercase tracking-widest flex-shrink-0">{species}</p>
+                        <span className="text-emerald-200 font-light">|</span>
+                        <div className="flex-1 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                          <p className="text-sm font-bold text-slate-800">{dosage}</p>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -384,16 +387,15 @@ const PharmacistView: React.FC<PharmacistViewProps> = ({ pets }) => {
                       <Activity className="w-5 h-5 text-emerald-600" /> 動力學參數 (Pharmacokinetics)
                     </h3>
                   </div>
-                  <div className="space-y-6">
+                  <div className="space-y-3">
                     {Object.entries(selectedMedInfo.info.pkParameters).map(([species, params]) => (
-                      <div key={species} className="overflow-hidden">
-                        <p className="text-xs font-black text-emerald-600 mb-3 uppercase tracking-widest flex items-center gap-2">
-                          <span className="w-4 h-[1px] bg-emerald-200" /> {species}
-                        </p>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                      <div key={species} className="flex items-start gap-1.5">
+                        <p className="w-12 text-sm font-black text-emerald-600 uppercase tracking-widest flex-shrink-0 mt-4">{species}</p>
+                        <span className="text-emerald-200 font-light mt-4">|</span>
+                        <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-2">
                           {Object.entries(params).map(([key, val]) => (
-                            <div key={key} className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
-                              <p className="text-[10px] text-slate-500 font-bold mb-1 uppercase tracking-wider">{key}</p>
+                            <div key={key} className="bg-slate-50/50 p-3 rounded-xl border border-slate-100">
+                              <p className="text-[10px] text-slate-500 font-bold mb-0.5 uppercase tracking-wider">{key}</p>
                               <p className="text-sm font-black text-slate-900">{val}</p>
                             </div>
                           ))}

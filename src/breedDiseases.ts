@@ -1,15 +1,10 @@
 export const BREED_DISEASES: Record<string, string[]> = {
-  "大麥町 (Dalmatian)": ["尿酸代謝問題", "尿路結石"],
-  "哈士奇 (Husky)": ["關節發育不良", "眼部疾病"],
-  "黃金獵犬 (Golden Retriever)": ["關節發育不良", "心臟病", "皮膚過敏"],
-  "拉不拉多 (Labrador)": ["關節發育不良", "肥胖傾向"],
-  "貴賓犬 (Poodle)": ["膝蓋骨脫臼", "眼部疾病"],
-  "柴犬 (Shiba Inu)": ["皮膚過敏", "青光眼"],
-  "柯基 (Corgi)": ["椎間盤疾病", "肥胖傾向"],
-  "法國鬥牛犬 (French Bulldog)": ["呼吸道症候群", "皮膚褶皺感染", "脊椎問題"],
-  "波斯貓 (Persian)": ["多囊性腎病", "呼吸道問題"],
-  "曼赤肯 (Munchkin)": ["脊椎問題", "關節炎"],
-  "布偶貓 (Ragdoll)": ["肥厚性心肌病"],
+  "大麥町 (Dalmatian)": ["鼓勵多喝水，並注意泌尿系統保健。"],
+  "哈士奇 (Husky)": ["需注意關節活動度，並定期檢查眼部健康。"],
+  "黃金獵犬 (Golden Retriever)": ["建議維持理想體重以減輕關節負擔，並注意皮膚乾燥問題。"],
+  "拉不拉多 (Labrador)": ["需嚴格控制食量，避免過度負擔。"],
+  "波斯貓 (Persian)": ["建議定期追蹤腎臟健康，並維持呼吸道順暢。"],
+  "布偶貓 (Ragdoll)": ["建議定期進行心血管系統檢查。"],
 };
 
 export function getBreedDiseases(breed: string): string[] {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Pet, HealthIssue, Medication } from '../types';
 import { ALLERGENS, MEDICATION_CATEGORIES, BODY_PARTS } from '../constants';
-import { OWNER_MEDICATION_RULES } from '../data/medicationData';
+import { OWNER_MEDICATION_RULES, PHARMACIST_MEDICATIONS } from '../data/medicationData';
 import { X, Plus, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -12,6 +12,9 @@ interface HealthStatusFormProps {
 
 const HealthStatusForm: React.FC<HealthStatusFormProps> = ({ pet, onChange }) => {
   const [activePart, setActivePart] = useState<string | null>(null);
+  const [showSuggestions, setShowSuggestions] = useState<string | null>(null);
+
+  const medicationNames = Object.keys(PHARMACIST_MEDICATIONS);
 
   const toggleAllergen = (allergen: string) => {
     if (allergen === '無') {
@@ -263,15 +266,49 @@ const HealthStatusForm: React.FC<HealthStatusFormProps> = ({ pet, onChange }) =>
                 </div>
                 <p className="text-[10px] text-gray-400 mb-2">常見舉例：{cat.examples}</p>
                 {isSelected && (
-                  <div onClick={(e) => e.stopPropagation()}>
+                  <div onClick={(e) => e.stopPropagation()} className="relative">
                     <input
                       type="text"
                       placeholder="輸入實際藥品名稱..."
                       autoFocus
                       value={pet.medications.find(m => m.category === cat.id)?.name || ''}
-                      onChange={(e) => updateMedication(cat.id, e.target.value)}
+                      onChange={(e) => {
+                        updateMedication(cat.id, e.target.value);
+                        setShowSuggestions(cat.id);
+                      }}
+                      onFocus={() => setShowSuggestions(cat.id)}
+                      onBlur={() => setTimeout(() => setShowSuggestions(null), 200)}
                       className="w-full px-3 py-2 text-sm rounded-lg border border-orange-200 outline-none focus:border-orange-400 bg-white"
                     />
+                    <AnimatePresence>
+                      {showSuggestions === cat.id && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          className="absolute left-0 right-0 top-full mt-1 bg-white border border-orange-100 rounded-xl shadow-xl z-50 max-h-40 overflow-y-auto"
+                        >
+                          {medicationNames
+                            .filter(name => {
+                              const currentVal = pet.medications.find(m => m.category === cat.id)?.name || '';
+                              return currentVal && name.toLowerCase().startsWith(currentVal.toLowerCase()) && name !== currentVal;
+                            })
+                            .map(name => (
+                              <button
+                                key={name}
+                                onClick={() => {
+                                  updateMedication(cat.id, name);
+                                  setShowSuggestions(null);
+                                }}
+                                className="w-full text-left px-4 py-2 text-sm hover:bg-orange-50 font-bold text-stone-700 transition-colors"
+                              >
+                                {name}
+                              </button>
+                            ))
+                          }
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 )}
               </div>

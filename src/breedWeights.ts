@@ -20,22 +20,6 @@ export const BREED_WEIGHTS: Record<string, { male: StandardWeight; female: Stand
     male: { min: 29, max: 36 },
     female: { min: 25, max: 32 }
   },
-  "貴賓犬 (Poodle)": {
-    male: { min: 20, max: 32 },
-    female: { min: 20, max: 27 }
-  },
-  "柴犬 (Shiba Inu)": {
-    male: { min: 9, max: 11 },
-    female: { min: 7, max: 9 }
-  },
-  "柯基 (Corgi)": {
-    male: { min: 10, max: 14 },
-    female: { min: 10, max: 13 }
-  },
-  "法國鬥牛犬 (French Bulldog)": {
-    male: { min: 9, max: 13 },
-    female: { min: 8, max: 12 }
-  },
   "波斯貓 (Persian)": {
     male: { min: 4, max: 6 },
     female: { min: 3, max: 5 }

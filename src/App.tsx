@@ -1,20 +1,16 @@
-import { useState, useEffect } from 'react';
-import { Pet, Recommendation } from './types';
+import { useState } from 'react';
+import { Pet } from './types';
 import { UserCircle, ShoppingBag, Plus, Save, ArrowLeft, ShieldCheck, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import PetProfile from './components/PetProfile';
 import BasicInfoForm from './components/BasicInfoForm';
 import HealthStatusForm from './components/HealthStatusForm';
-import ExpertRecommendations from './components/ExpertRecommendations';
 import Mall from './components/Mall';
 import PharmacistView from './components/PharmacistView';
-import { GoogleGenAI } from "@google/genai";
-
-import { getBreedDiseases } from './breedDiseases';
 
 const INITIAL_PET: Pet = {
-  id: '1',
-  displayId: 'KID-2026-001',
+  id: '',
+  displayId: '',
   name: '',
   species: 'dog',
   breed: '',
@@ -36,8 +32,6 @@ export default function App() {
   const [pets, setPets] = useState<Pet[]>([]);
   const [activePetId, setActivePetId] = useState<string | null>(null);
   const [editingPet, setEditingPet] = useState<Pet | null>(null);
-  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-  const [isGenerating, setIsGenerating] = useState(false);
 
   const activePet = pets.find(p => p.id === activePetId) || null;
 
@@ -47,77 +41,14 @@ export default function App() {
     if (pets.find(p => p.id === editingPet.id)) {
       setPets(pets.map(p => p.id === editingPet.id ? editingPet : p));
     } else {
-      setPets([...pets, editingPet]);
-      setActivePetId(editingPet.id);
+      const nextId = (pets.length + 1).toString().padStart(5, '0');
+      const newPet = { ...editingPet, id: nextId, displayId: nextId };
+      setPets([...pets, newPet]);
+      setActivePetId(nextId);
     }
     setEditingPet(null);
     setView('profile');
   };
-
-  const generateRecommendations = async (pet: Pet) => {
-    if (!pet.name || !pet.breed) return;
-    setIsGenerating(true);
-    
-    try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-      const breedDiseases = getBreedDiseases(pet.breed);
-      const promptText = `你是一位專業的寵物健康顧問。請根據以下毛孩資料提供 2-3 個具體的健康建議。
-      毛孩資料：
-      - 名字：${pet.name}
-      - 品種：${pet.breed} (品種好發疾病：${breedDiseases.join(', ')})
-      - 年齡：${pet.ageYears}歲${pet.ageMonths}個月
-      - 體重：${pet.weight}kg
-      - 過敏原：${pet.allergens.join(', ')}
-      - 健康問題：${pet.healthIssues.map(h => h.part + ': ' + h.diseases.join(', ')).join('; ')}
-      - 目前用藥：${pet.medications.map(m => m.name).join(', ')}
-
-      請以 JSON 格式回傳，格式如下：
-      [
-        { "type": "warning" | "suggestion", "title": "標題", "content": "具體內容" }
-      ]
-      
-      特別注意：
-      1. 如果品種好發疾病包含「尿酸代謝問題」，請務必提醒，並建議低嘌呤飲食。
-      2. 如果有「關節」問題或屬於大型犬，請建議補充關節營養品。
-      3. 如果正在服用「抗生素」，請建議補充益生菌。
-      4. 如果有「口腔」或「口臭」問題，請建議潔牙產品。
-      5. 如果有「皮膚」問題，請建議 Omega-3 補充。
-      6. 如果有「外耳炎」，請建議潔耳液與棉球。
-      
-      在 content 中，如果推薦了產品，請務必包含「推薦產品：[產品名稱]」字樣。`;
-
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-latest",
-        contents: [{ parts: [{ text: promptText }] }],
-      });
-
-      const text = response.text || '';
-      const jsonMatch = text.match(/\[.*\]/s);
-      if (jsonMatch) {
-        setRecommendations(JSON.parse(jsonMatch[0]));
-      }
-    } catch (error) {
-      console.error('Failed to generate recommendations:', error);
-      // Fallback recommendations if AI fails
-      const fallback: Recommendation[] = [];
-      if (pet.breed === '大麥町 (Dalmatian)') {
-        fallback.push({
-          type: 'warning',
-          title: '品種特定健康提醒',
-          content: '大麥町犬天生代謝尿酸能力較差，容易產生尿路結石。建議選擇低嘌呤飲食，並確保充足飲水。'
-        });
-      }
-      setRecommendations(fallback);
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  useEffect(() => {
-    if (activePet && view === 'profile') {
-      generateRecommendations(activePet);
-    }
-  }, [activePetId, view, activePet]);
 
   if (role === 'pharmacist') {
     return (
@@ -158,7 +89,7 @@ export default function App() {
           />
           <div>
             <h1 className="text-3xl font-black text-stone-900 tracking-tighter">寵健康</h1>
-            <p className="text-orange-600 font-bold text-sm">寵物健康與生活管理專家</p>
+            <p className="text-slate-500 font-bold text-sm">寵物健康與生活管理專家</p>
           </div>
         </div>
 
@@ -182,10 +113,6 @@ export default function App() {
                     onUpdatePet={(updates) => {
                       setPets(pets.map(p => p.id === activePet.id ? { ...p, ...updates } : p));
                     }}
-                  />
-                  <ExpertRecommendations 
-                    recommendations={recommendations} 
-                    loading={isGenerating}
                   />
                 </>
               ) : (
