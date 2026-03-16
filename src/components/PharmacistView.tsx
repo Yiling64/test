@@ -32,7 +32,7 @@ const PharmacistView: React.FC<PharmacistViewProps> = ({ pets }) => {
   };
 
   const renderBulletPoints = (text: string) => {
-    const points = text.split(/[。.]/).filter(p => p.trim());
+    const points = text.split(/。/).filter(p => p.trim());
     return (
       <ul className="list-disc list-inside space-y-1">
         {points.map((point, i) => (

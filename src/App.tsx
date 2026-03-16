@@ -10,9 +10,11 @@ import Mall from './components/Mall';
 import PharmacistView from './components/PharmacistView';
 import { GoogleGenAI } from "@google/genai";
 
+import { getBreedDiseases } from './breedDiseases';
+
 const INITIAL_PET: Pet = {
   id: '1',
-  displayId: 'PET-2026-001',
+  displayId: 'KID-2026-001',
   name: '',
   species: 'dog',
   breed: '',
@@ -25,29 +27,19 @@ const INITIAL_PET: Pet = {
   allergens: ['無'],
   healthIssues: [],
   medications: [],
+  healthCheckRecords: [],
 };
 
 export default function App() {
   const [role, setRole] = useState<'owner' | 'pharmacist'>('owner');
   const [view, setView] = useState<'profile' | 'mall' | 'form' | 'health-form'>('profile');
-  const [pets, setPets] = useState<Pet[]>(() => {
-    const saved = localStorage.getItem('pet_data');
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [activePetId, setActivePetId] = useState<string | null>(() => {
-    const saved = localStorage.getItem('pet_data');
-    const parsed = saved ? JSON.parse(saved) : [];
-    return parsed.length > 0 ? parsed[0].id : null;
-  });
+  const [pets, setPets] = useState<Pet[]>([]);
+  const [activePetId, setActivePetId] = useState<string | null>(null);
   const [editingPet, setEditingPet] = useState<Pet | null>(null);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const activePet = pets.find(p => p.id === activePetId) || null;
-
-  useEffect(() => {
-    localStorage.setItem('pet_data', JSON.stringify(pets));
-  }, [pets]);
 
   const handleSavePet = () => {
     if (!editingPet) return;
@@ -68,10 +60,11 @@ export default function App() {
     
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const breedDiseases = getBreedDiseases(pet.breed);
       const promptText = `你是一位專業的寵物健康顧問。請根據以下毛孩資料提供 2-3 個具體的健康建議。
       毛孩資料：
       - 名字：${pet.name}
-      - 品種：${pet.breed}
+      - 品種：${pet.breed} (品種好發疾病：${breedDiseases.join(', ')})
       - 年齡：${pet.ageYears}歲${pet.ageMonths}個月
       - 體重：${pet.weight}kg
       - 過敏原：${pet.allergens.join(', ')}
@@ -84,8 +77,8 @@ export default function App() {
       ]
       
       特別注意：
-      1. 如果是「大麥町 (Dalmatian)」，請務必提醒尿酸代謝問題，並建議低嘌呤飲食。
-      2. 如果有「關節」問題或屬於大型犬（如哈士奇、黃金獵犬、拉不拉多），請建議補充關節營養品。
+      1. 如果品種好發疾病包含「尿酸代謝問題」，請務必提醒，並建議低嘌呤飲食。
+      2. 如果有「關節」問題或屬於大型犬，請建議補充關節營養品。
       3. 如果正在服用「抗生素」，請建議補充益生菌。
       4. 如果有「口腔」或「口臭」問題，請建議潔牙產品。
       5. 如果有「皮膚」問題，請建議 Omega-3 補充。
@@ -155,6 +148,20 @@ export default function App() {
       </div>
 
       <main className="max-w-2xl mx-auto p-4 pt-8">
+        {/* Brand Header */}
+        <div className="flex items-center gap-4 mb-10">
+          <img 
+            src="https://i.ibb.co/DfgdV857/S-230916150.jpg" 
+            alt="寵健康" 
+            className="w-16 h-16 rounded-2xl object-cover shadow-md border-2 border-white"
+            referrerPolicy="no-referrer"
+          />
+          <div>
+            <h1 className="text-3xl font-black text-stone-900 tracking-tighter">寵健康</h1>
+            <p className="text-orange-600 font-bold text-sm">寵物健康與生活管理專家</p>
+          </div>
+        </div>
+
         <AnimatePresence mode="wait">
           {view === 'profile' && (
             <motion.div
@@ -172,6 +179,9 @@ export default function App() {
                       setEditingPet(activePet);
                       setView('form');
                     }} 
+                    onUpdatePet={(updates) => {
+                      setPets(pets.map(p => p.id === activePet.id ? { ...p, ...updates } : p));
+                    }}
                   />
                   <ExpertRecommendations 
                     recommendations={recommendations} 
@@ -302,7 +312,7 @@ export default function App() {
             }`}
           >
             <ShoppingBag className="w-6 h-6" />
-            <span className="text-[10px] font-black uppercase tracking-widest">寵物商城</span>
+            <span className="text-[10px] font-black uppercase tracking-widest">毛孩商城</span>
           </button>
         </nav>
       )}

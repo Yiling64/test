@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
-import { Pet, OwnerMedicationRule } from '../types';
+import { Pet, OwnerMedicationRule, HealthCheckRecord } from '../types';
 import { BODY_PARTS, MEDICATION_CATEGORIES } from '../constants';
 import { OWNER_MEDICATION_RULES } from '../data/medicationData';
-import { AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { AlertCircle, ChevronDown, ChevronUp, Clipboard, Calendar, Image as ImageIcon, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { getBreedDiseases } from '../breedDiseases';
+import { getStandardWeight } from '../breedWeights';
 
 interface PetProfileProps {
   pet: Pet;
   onEdit: () => void;
+  onUpdatePet: (updates: Partial<Pet>) => void;
 }
 
-const PetProfile: React.FC<PetProfileProps> = ({ pet, onEdit }) => {
+const PetProfile: React.FC<PetProfileProps> = ({ pet, onEdit, onUpdatePet }) => {
   const [expandedMed, setExpandedMed] = useState<string | null>(null);
+  const [showHealthRecords, setShowHealthRecords] = useState(false);
+  const [newRecordDate, setNewRecordDate] = useState(new Date().toISOString().split('T')[0]);
+  const [newRecordPhoto, setNewRecordPhoto] = useState('');
   const hasMeds = pet.medications.length > 0;
   const hasIssues = pet.healthIssues.length > 0;
 
@@ -26,26 +32,34 @@ const PetProfile: React.FC<PetProfileProps> = ({ pet, onEdit }) => {
   const getWeightInfo = () => {
     if (pet.weight === null) return null;
     
-    let range = '';
-    let status = '';
-    let statusColor = 'text-gray-500';
+    const standard = getStandardWeight(pet.breed, pet.gender);
+    if (!standard) return null;
 
-    if (pet.species === 'dog' && pet.gender === 'female') {
-      if (pet.breed === '哈士奇 (Husky)') {
-        range = '16 - 23 kg';
-        if (pet.weight < 16) { status = '過輕'; statusColor = 'text-red-500'; }
-        else if (pet.weight > 23) { status = '過重'; statusColor = 'text-red-500'; }
-        else { status = '適中'; statusColor = 'text-orange-600'; }
-      } else if (pet.breed === '大麥町 (Dalmatian)') {
-        range = '24 - 29 kg';
-        if (pet.weight < 24) { status = '過輕'; statusColor = 'text-red-500'; }
-        else if (pet.weight > 29) { status = '過重'; statusColor = 'text-red-500'; }
-        else { status = '適中'; statusColor = 'text-orange-600'; }
-      }
-    }
+    const range = `${standard.min} - ${standard.max} kg`;
+    let status: string;
+    let statusColor: string;
+
+    if (pet.weight < standard.min) { status = '過輕'; statusColor = 'text-red-500'; }
+    else if (pet.weight > standard.max) { status = '過重'; statusColor = 'text-red-500'; }
+    else { status = '適中'; statusColor = 'text-orange-600'; }
 
     return { range, status, statusColor };
   };
+
+  const handleAddHealthRecord = () => {
+    if (!newRecordDate || !newRecordPhoto) return;
+    const newRecord: HealthCheckRecord = {
+      id: Date.now().toString(),
+      date: newRecordDate,
+      photoUrl: newRecordPhoto
+    };
+    onUpdatePet({
+      healthCheckRecords: [...(pet.healthCheckRecords || []), newRecord]
+    });
+    setNewRecordPhoto('');
+  };
+
+  const breedDiseases = getBreedDiseases(pet.breed);
 
   const weightInfo = getWeightInfo();
 
@@ -187,16 +201,110 @@ const PetProfile: React.FC<PetProfileProps> = ({ pet, onEdit }) => {
       </div>
 
       {/* Special Reminders Section */}
-      {pet.breed === '大麥町 (Dalmatian)' && (
+      {breedDiseases.length > 0 && (
         <div className="mt-8 p-4 bg-blue-50/50 rounded-xl border border-blue-100/50 space-y-2">
           <h3 className="text-[10px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-1">
             <span className="w-1 h-1 bg-blue-400 rounded-full"></span> 品種性疾病提示 / Breed-Specific Alert
           </h3>
-          <p className="text-xs text-blue-700 leading-relaxed">
-            • 大麥町犬天生代謝尿酸能力差，建議選擇低嘌呤飲食。
-          </p>
+          <div className="text-xs text-blue-700 leading-relaxed">
+            {breedDiseases.map((disease, i) => (
+              <p key={i}>• {disease}</p>
+            ))}
+          </div>
         </div>
       )}
+
+      {/* Health Check Entry Button */}
+      <div className="mt-6">
+        <button 
+          onClick={() => setShowHealthRecords(true)}
+          className="w-full py-4 bg-stone-900 text-white rounded-2xl font-black shadow-lg hover:bg-stone-800 transition-all flex items-center justify-center gap-2"
+        >
+          <Clipboard className="w-5 h-5" />
+          健檢紀錄入口
+        </button>
+      </div>
+
+      {/* Health Records Modal */}
+      <AnimatePresence>
+        {showHealthRecords && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowHealthRecords(false)}
+              className="absolute inset-0 bg-stone-900/60 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-white rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
+            >
+              <div className="p-6 border-b border-stone-100 flex justify-between items-center">
+                <h3 className="text-xl font-black">健檢紀錄</h3>
+                <button onClick={() => setShowHealthRecords(false)} className="p-2 hover:bg-stone-50 rounded-full">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                {/* Add New Record */}
+                <div className="bg-stone-50 p-4 rounded-2xl space-y-4">
+                  <h4 className="text-sm font-black text-stone-500 uppercase tracking-widest">新增紀錄</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 bg-white p-3 rounded-xl border border-stone-200">
+                      <Calendar className="w-5 h-5 text-stone-400" />
+                      <input 
+                        type="date" 
+                        value={newRecordDate}
+                        onChange={(e) => setNewRecordDate(e.target.value)}
+                        className="bg-transparent outline-none text-sm font-bold w-full"
+                      />
+                    </div>
+                    <div className="flex items-center gap-3 bg-white p-3 rounded-xl border border-stone-200">
+                      <ImageIcon className="w-5 h-5 text-stone-400" />
+                      <input 
+                        type="text" 
+                        placeholder="貼上健檢照片網址..."
+                        value={newRecordPhoto}
+                        onChange={(e) => setNewRecordPhoto(e.target.value)}
+                        className="bg-transparent outline-none text-sm font-bold w-full"
+                      />
+                    </div>
+                    <button 
+                      onClick={handleAddHealthRecord}
+                      className="w-full bg-orange-500 text-white py-3 rounded-xl font-black shadow-lg shadow-orange-100 hover:bg-orange-600 transition-all"
+                    >
+                      新增紀錄
+                    </button>
+                  </div>
+                </div>
+
+                {/* List Records */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-black text-stone-500 uppercase tracking-widest">歷史紀錄</h4>
+                  {pet.healthCheckRecords?.length > 0 ? (
+                    <div className="grid grid-cols-1 gap-4">
+                      {pet.healthCheckRecords.map(record => (
+                        <div key={record.id} className="bg-white border border-stone-100 rounded-2xl overflow-hidden shadow-sm">
+                          <img src={record.photoUrl} alt={record.date} className="w-full h-40 object-cover" referrerPolicy="no-referrer" />
+                          <div className="p-3 bg-stone-50 flex justify-between items-center">
+                            <span className="text-sm font-black text-stone-700">{record.date}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-center py-10 text-stone-400 font-bold italic">尚無紀錄</p>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Footer / Date */}
       <div className="mt-12 pt-4 border-t border-gray-100 text-[10px] text-gray-300 flex justify-between italic">

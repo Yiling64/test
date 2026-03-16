@@ -15,6 +15,12 @@ export interface Medication {
   name: string;
 }
 
+export interface HealthCheckRecord {
+  id: string;
+  date: string;
+  photoUrl: string;
+}
+
 export interface Pet {
   id: string;
   displayId: string;
@@ -31,6 +37,7 @@ export interface Pet {
   healthIssues: HealthIssue[];
   medications: Medication[];
   photoUrl?: string;
+  healthCheckRecords: HealthCheckRecord[];
 }
 
 export interface Recommendation {
